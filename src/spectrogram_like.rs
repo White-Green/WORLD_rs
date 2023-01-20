@@ -5,6 +5,7 @@ pub struct SpectrogramLike<T> {
 
 impl<T: Default + Copy> SpectrogramLike<T> {
     pub fn new(time_axis_size: usize, frequency_axis_size: usize) -> SpectrogramLike<T> {
+        assert!(time_axis_size * frequency_axis_size > 0);
         let mut all = vec![T::default(); time_axis_size * frequency_axis_size].into_boxed_slice();
         let mut chunks_iter = all.chunks_exact_mut(frequency_axis_size);
         let lines = chunks_iter.by_ref().map(|slice| slice.as_mut_ptr()).collect::<Box<[_]>>();
