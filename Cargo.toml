@@ -16,4 +16,5 @@ default-members = [
 ]
 
 [dependencies]
+once_cell = "1.17.0"
 world_sys = { path = "./world_sys" }

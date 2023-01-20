@@ -43,29 +43,25 @@ impl<T> SpectrogramLike<T> {
         self.all.chunks_mut(f)
     }
 
-    pub fn ptr(&mut self) -> *mut *mut T {
+    pub fn as_mut_ptr(&mut self) -> *mut *mut T {
         self.lines.as_mut_ptr()
     }
 }
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
-    fn test_spectrogram_like(){
-        let mut spec = SpectrogramLike::<u32>::new(10,5);
+    fn test_spectrogram_like() {
+        let mut spec = SpectrogramLike::<u32>::new(10, 5);
         assert_eq!(spec.time_axis_size(), 10);
         assert_eq!(spec.frequency_axis_size(), 5);
-        spec.lines_mut()
-            .enumerate()
-            .for_each(|(i, line)|line.iter_mut().enumerate().for_each(|(j, item)|*item=(i*5+j) as u32));
-        spec.lines()
-            .enumerate()
-            .for_each(|(i, line)|line.iter().enumerate().for_each(|(j, item)| assert_eq!(*item, (i * 5 + j) as u32)));
-        let ptr = spec.ptr();
-        for i in 0..10{
-            for j in 0..5{
+        spec.lines_mut().enumerate().for_each(|(i, line)| line.iter_mut().enumerate().for_each(|(j, item)| *item = (i * 5 + j) as u32));
+        spec.lines().enumerate().for_each(|(i, line)| line.iter().enumerate().for_each(|(j, item)| assert_eq!(*item, (i * 5 + j) as u32)));
+        let ptr = spec.as_mut_ptr();
+        for i in 0..10 {
+            for j in 0..5 {
                 assert_eq!(unsafe { *(*ptr.offset(i)).offset(j) }, (i * 5 + j) as u32);
             }
         }

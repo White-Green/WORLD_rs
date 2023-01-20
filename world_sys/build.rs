@@ -51,7 +51,7 @@ impl ParseCallbacks for Cb {
         static BRACKET_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"[\[\]]").unwrap());
         let comment = BRACKET_REGEX.replace_all(&comment, r"\$0");
         static URL_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"https?://\w+(\.\w+)*(/[\w.]+)*").unwrap());
-        let comment = URL_REGEX.replace_all(&comment, "[$0]($0)");
+        let comment = URL_REGEX.replace_all(&comment, "<$0>");
         Some(comment.into_owned())
     }
 }
