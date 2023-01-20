@@ -2,7 +2,7 @@ use crate::spectrogram_like::SpectrogramLike;
 use std::collections::VecDeque;
 use std::mem::MaybeUninit;
 use std::slice;
-use world_sys::{AddParameters, InitializeSynthesizer, IsLocked, RefreshSynthesizer, Synthesis, Synthesis2, WorldSynthesizer};
+use world_sys::{AddParameters, DestroySynthesizer, InitializeSynthesizer, IsLocked, RefreshSynthesizer, Synthesis, Synthesis2, WorldSynthesizer};
 
 pub enum SynthesisError {
     DifferentSizeInput,
@@ -75,5 +75,11 @@ impl Synthesizer {
             }
         }
         Ok(())
+    }
+}
+
+impl Drop for Synthesizer {
+    fn drop(&mut self) {
+        unsafe { DestroySynthesizer(&mut self.synthesizer) }
     }
 }
