@@ -19,6 +19,13 @@ pub struct SignalAnalyzer {
     aperiodicity: OnceCell<SpectrogramLike<f64>>,
 }
 
+pub struct AnalyzeResult {
+    pub signal: Box<[f64]>,
+    pub f0: Option<Box<[f64]>>,
+    pub spectrogram: Option<SpectrogramLike<f64>>,
+    pub aperiodicity: Option<SpectrogramLike<f64>>,
+}
+
 pub struct SignalAnalyzerBuilder {
     fs: i32,
     harvest_option: HarvestOption,
@@ -167,5 +174,20 @@ impl SignalAnalyzer {
             }
             aperiodicity
         })
+    }
+
+    pub fn calc_all(&self) {
+        self.spectrogram();
+        self.aperiodicity();
+    }
+
+    pub fn into_result(self) -> AnalyzeResult {
+        let SignalAnalyzer { signal, harvest_result, spectrogram, aperiodicity, .. } = self;
+        AnalyzeResult {
+            signal,
+            f0: harvest_result.into_inner().map(|HarvestResult { f0, .. }| f0),
+            spectrogram: spectrogram.into_inner(),
+            aperiodicity: aperiodicity.into_inner(),
+        }
     }
 }
