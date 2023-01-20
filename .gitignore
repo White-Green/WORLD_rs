@@ -1,0 +1,6 @@
+/*
+!/.gitignore
+!/.gitmodules
+!/Cargo.toml
+!/src
+!/world_sys
