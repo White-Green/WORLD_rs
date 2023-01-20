@@ -101,6 +101,22 @@ impl SignalAnalyzer {
         }
     }
 
+    pub fn fs(&self) -> i32 {
+        self.fs
+    }
+
+    pub fn harvest_option(&self) -> &HarvestOption {
+        &self.harvest_option
+    }
+
+    pub fn cheaptrick_option(&self) -> &CheapTrickOption {
+        &self.cheaptrick_option
+    }
+
+    pub fn d4c_option(&self) -> &D4COption {
+        &self.d4c_option
+    }
+
     fn harvest_result(&self) -> &HarvestResult {
         self.harvest_result.get_or_init(|| {
             let samples = unsafe { GetSamplesForHarvest(self.fs, self.signal.len() as i32, self.harvest_option.frame_period()) };
