@@ -1,14 +1,29 @@
 use crate::spectrogram_like::SpectrogramLike;
 use std::collections::VecDeque;
+use std::error::Error;
+use std::fmt::{Display, Formatter};
 use std::mem::MaybeUninit;
 use std::slice;
 use world_sys::{AddParameters, DestroySynthesizer, InitializeSynthesizer, IsLocked, RefreshSynthesizer, Synthesis, Synthesis2, WorldSynthesizer};
 
+#[derive(Debug)]
 pub enum SynthesisError {
     DifferentSizeInput,
     TooLargeValue,
     InvalidFFTSize,
 }
+
+impl Display for SynthesisError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SynthesisError::DifferentSizeInput => write!(f, "Different size input"),
+            SynthesisError::TooLargeValue => write!(f, "Too large value"),
+            SynthesisError::InvalidFFTSize => write!(f, "invalid fft size"),
+        }
+    }
+}
+
+impl Error for SynthesisError {}
 
 pub fn synthesis_to(f0: &[f64], spectrogram: &SpectrogramLike<f64>, aperiodicity: &SpectrogramLike<f64>, fft_size: Option<i32>, frame_period: f64, fs: i32, out: &mut [f64]) -> Result<(), SynthesisError> {
     if f0.len() != spectrogram.time_axis_size() || spectrogram.time_axis_size() != aperiodicity.time_axis_size() || spectrogram.frequency_axis_size() != aperiodicity.frequency_axis_size() {
