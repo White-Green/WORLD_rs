@@ -19,7 +19,73 @@ pub struct SignalAnalyzer {
     aperiodicity: OnceCell<SpectrogramLike<f64>>,
 }
 
+pub struct SignalAnalyzerBuilder {
+    fs: i32,
+    harvest_option: HarvestOption,
+    cheaptrick_option: CheapTrickOption,
+    d4c_option: D4COption,
+}
+
+impl SignalAnalyzerBuilder {
+    pub fn new(fs: u32) -> SignalAnalyzerBuilder {
+        let fs = fs.try_into().unwrap();
+        SignalAnalyzerBuilder {
+            fs,
+            harvest_option: HarvestOption::new(),
+            cheaptrick_option: CheapTrickOption::new(fs),
+            d4c_option: D4COption::new(),
+        }
+    }
+
+    pub fn fs(&self) -> i32 {
+        self.fs
+    }
+
+    pub fn harvest_option(&self) -> &HarvestOption {
+        &self.harvest_option
+    }
+
+    pub fn harvest_option_mut(&mut self) -> &mut HarvestOption {
+        &mut self.harvest_option
+    }
+
+    pub fn cheaptrick_option(&self) -> &CheapTrickOption {
+        &self.cheaptrick_option
+    }
+
+    pub fn cheaptrick_option_mut(&mut self) -> &mut CheapTrickOption {
+        &mut self.cheaptrick_option
+    }
+
+    pub fn d4c_option(&self) -> &D4COption {
+        &self.d4c_option
+    }
+
+    pub fn d4c_option_mut(&mut self) -> &mut D4COption {
+        &mut self.d4c_option
+    }
+
+    pub fn build(self, signal: Box<[f64]>) -> SignalAnalyzer {
+        SignalAnalyzer::from_builder(self, signal)
+    }
+}
+
 impl SignalAnalyzer {
+    pub fn from_builder(builder: SignalAnalyzerBuilder, signal: Box<[f64]>) -> SignalAnalyzer {
+        let SignalAnalyzerBuilder { fs, harvest_option, cheaptrick_option, d4c_option } = builder;
+        assert!(signal.len() <= i32::MAX as usize);
+        SignalAnalyzer {
+            signal,
+            fs,
+            harvest_option,
+            cheaptrick_option,
+            d4c_option,
+            harvest_result: OnceCell::new(),
+            spectrogram: OnceCell::new(),
+            aperiodicity: OnceCell::new(),
+        }
+    }
+
     pub fn new(signal: Box<[f64]>, fs: u32) -> SignalAnalyzer {
         assert!(signal.len() <= i32::MAX as usize);
         let fs = fs.try_into().unwrap();
