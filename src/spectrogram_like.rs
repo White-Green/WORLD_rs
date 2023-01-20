@@ -44,6 +44,10 @@ impl<T> SpectrogramLike<T> {
         self.all.chunks_mut(f)
     }
 
+    pub fn as_ptr(&self) -> *const *const T {
+        self.lines.as_ptr() as *const *const T
+    }
+
     pub fn as_mut_ptr(&mut self) -> *mut *mut T {
         self.lines.as_mut_ptr()
     }
