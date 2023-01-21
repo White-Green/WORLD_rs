@@ -25,22 +25,22 @@ impl Display for SynthesisError {
 
 impl Error for SynthesisError {}
 
-pub fn synthesis_to(f0: &[f64], spectrogram: &SpectrogramLike<f64>, aperiodicity: &SpectrogramLike<f64>, fft_size: Option<i32>, frame_period: f64, fs: i32, out: &mut [f64]) -> Result<(), SynthesisError> {
+pub fn synthesis_to(f0: &[f64], spectrogram: &SpectrogramLike<f64>, aperiodicity: &SpectrogramLike<f64>, fft_size: Option<i32>, frame_period: f64, fs: u32, out: &mut [f64]) -> Result<(), SynthesisError> {
     if f0.len() != spectrogram.time_axis_size() || spectrogram.time_axis_size() != aperiodicity.time_axis_size() || spectrogram.frequency_axis_size() != aperiodicity.frequency_axis_size() {
         return Err(SynthesisError::DifferentSizeInput);
     }
-    if out.len() > i32::MAX as usize || f0.len() > i32::MAX as usize {
+    if fs > i32::MAX as u32 || out.len() > i32::MAX as usize || f0.len() > i32::MAX as usize {
         return Err(SynthesisError::TooLargeValue);
     }
     let fft_size = fft_size.ok_or(()).or_else(|_| ((spectrogram.frequency_axis_size() - 1) * 2).try_into().map_err(|_| SynthesisError::TooLargeValue))?;
     if (fft_size / 2 + 1) as usize != spectrogram.frequency_axis_size() {
         return Err(SynthesisError::InvalidFFTSize);
     }
-    unsafe { Synthesis(f0.as_ptr(), f0.len() as i32, spectrogram.as_ptr(), aperiodicity.as_ptr(), fft_size, frame_period, fs, out.len() as i32, out.as_mut_ptr()) }
+    unsafe { Synthesis(f0.as_ptr(), f0.len() as i32, spectrogram.as_ptr(), aperiodicity.as_ptr(), fft_size, frame_period, fs as i32, out.len() as i32, out.as_mut_ptr()) }
     Ok(())
 }
 
-pub fn synthesis(f0: &[f64], spectrogram: &SpectrogramLike<f64>, aperiodicity: &SpectrogramLike<f64>, fft_size: Option<i32>, frame_period: f64, fs: i32) -> Result<Vec<f64>, SynthesisError> {
+pub fn synthesis(f0: &[f64], spectrogram: &SpectrogramLike<f64>, aperiodicity: &SpectrogramLike<f64>, fft_size: Option<i32>, frame_period: f64, fs: u32) -> Result<Vec<f64>, SynthesisError> {
     let out_len = (f0.len() as f64 * frame_period * fs as f64 / 1000.).floor() as usize;
     let mut out = vec![0.; out_len];
     synthesis_to(f0, spectrogram, aperiodicity, fft_size, frame_period, fs, &mut out).map(move |_| out)
@@ -52,10 +52,11 @@ pub struct Synthesizer {
 }
 
 impl Synthesizer {
-    pub fn new(fs: i32, frame_period: f64, fft_size: i32) -> Synthesizer {
+    pub fn new(fs: u32, frame_period: f64, fft_size: i32) -> Synthesizer {
+        assert!(fs <= i32::MAX as u32);
         let synthesizer = unsafe {
             let mut synthesizer = MaybeUninit::uninit();
-            InitializeSynthesizer(fs, frame_period, fft_size, 128, 1, synthesizer.as_mut_ptr());
+            InitializeSynthesizer(fs as i32, frame_period, fft_size, 128, 1, synthesizer.as_mut_ptr());
             synthesizer.assume_init()
         };
         Synthesizer { synthesizer, queue: VecDeque::new() }
