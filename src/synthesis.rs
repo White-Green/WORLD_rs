@@ -92,6 +92,15 @@ impl Synthesizer {
         }
         Ok(())
     }
+
+    pub fn take_signal(&mut self, len: usize) -> impl Iterator<Item = f64> + '_ {
+        let len = len.min(self.queue.len());
+        self.queue.drain(..len)
+    }
+
+    pub fn take_signal_all(&mut self) -> impl Iterator<Item = f64> + '_ {
+        self.queue.drain(..)
+    }
 }
 
 impl Drop for Synthesizer {
