@@ -2,6 +2,7 @@ use crate::spectrogram_like::SpectrogramLike;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
+use std::iter::FusedIterator;
 use std::mem::MaybeUninit;
 use std::slice;
 use world_sys::{AddParameters, DestroySynthesizer, InitializeSynthesizer, IsLocked, RefreshSynthesizer, Synthesis, Synthesis2, WorldSynthesizer};
@@ -93,12 +94,12 @@ impl Synthesizer {
         Ok(())
     }
 
-    pub fn take_signal(&mut self, len: usize) -> impl Iterator<Item = f64> + '_ {
+    pub fn take_signal(&mut self, len: usize) -> impl Iterator<Item = f64> + DoubleEndedIterator + ExactSizeIterator + FusedIterator + '_ {
         let len = len.min(self.queue.len());
         self.queue.drain(..len)
     }
 
-    pub fn take_signal_all(&mut self) -> impl Iterator<Item = f64> + '_ {
+    pub fn take_signal_all(&mut self) -> impl Iterator<Item = f64> + DoubleEndedIterator + ExactSizeIterator + FusedIterator + '_ {
         self.queue.drain(..)
     }
 }
