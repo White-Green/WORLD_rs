@@ -42,7 +42,7 @@ pub fn synthesis_to(f0: &[f64], spectrogram: &SpectrogramLike<f64>, aperiodicity
 }
 
 pub fn synthesis(f0: &[f64], spectrogram: &SpectrogramLike<f64>, aperiodicity: &SpectrogramLike<f64>, fft_size: Option<i32>, frame_period: f64, fs: u32) -> Result<Vec<f64>, SynthesisError> {
-    let out_len = (f0.len() as f64 * frame_period * fs as f64 / 1000.).floor() as usize;
+    let out_len = (f0.len() as f64 * frame_period * fs as f64 / 1000.).ceil() as usize;
     let mut out = vec![0.; out_len];
     synthesis_to(f0, spectrogram, aperiodicity, fft_size, frame_period, fs, &mut out).map(move |_| out)
 }
