@@ -5,7 +5,7 @@ use std::borrow::Cow;
 use std::env;
 use std::path::Path;
 
-const WORLD_BASE_DIR: &str = "World";
+const WORLD_BASE_DIR: &str = "WORLD";
 const WORLD_FILE_NAMES: &[&str] = &["cheaptrick", "codec", "common", "d4c", "dio", "fft", "harvest", "matlabfunctions", "stonemask", "synthesis", "synthesisrealtime"];
 
 fn main() {
