@@ -53,6 +53,43 @@ impl<T> SpectrogramLike<T> {
     }
 }
 
+#[cfg(feature = "ndarray")]
+mod ndarray {
+    use ndarray::Array2;
+
+    use super::SpectrogramLike;
+
+    impl<T: Clone> From<Array2<T>> for SpectrogramLike<T> {
+        fn from(arr: Array2<T>) -> Self {
+            let mut arr = if arr.is_standard_layout() {
+                arr
+            } else {
+                arr.as_standard_layout().into_owned()
+            };
+
+            let lines = arr
+                .rows_mut()
+                .into_iter()
+                .map(|row| { row }.as_mut_ptr())
+                .collect();
+
+            let all = arr.into_raw_vec().into();
+
+            Self { all, lines }
+        }
+    }
+
+    impl<T> From<SpectrogramLike<T>> for Array2<T> {
+        fn from(spectrogram_like: SpectrogramLike<T>) -> Self {
+            let SpectrogramLike { all, lines } = spectrogram_like;
+            assert!(all.len() % lines.len() == 0);
+            let nrows = lines.len();
+            let ncols = all.len() / lines.len();
+            Self::from_shape_vec((nrows, ncols), all.into()).expect("should match")
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
