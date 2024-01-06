@@ -1,7 +1,9 @@
 /*
+!/.github
 !/.gitignore
 !/.gitmodules
 !/Cargo.toml
 !/LICENSE
+!/rustfmt.toml
 !/src
 !/world_sys

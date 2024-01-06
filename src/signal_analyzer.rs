@@ -79,7 +79,12 @@ impl SignalAnalyzerBuilder {
 
 impl SignalAnalyzer {
     pub fn from_builder(builder: SignalAnalyzerBuilder, signal: Box<[f64]>) -> SignalAnalyzer {
-        let SignalAnalyzerBuilder { fs, harvest_option, cheaptrick_option, d4c_option } = builder;
+        let SignalAnalyzerBuilder {
+            fs,
+            harvest_option,
+            cheaptrick_option,
+            d4c_option,
+        } = builder;
         assert!(signal.len() <= i32::MAX as usize);
         SignalAnalyzer {
             signal,
@@ -130,7 +135,14 @@ impl SignalAnalyzer {
             let mut temporal_positions = vec![0.; samples as usize].into_boxed_slice();
             let mut f0 = vec![0.; samples as usize].into_boxed_slice();
             unsafe {
-                Harvest(self.signal.as_ptr(), self.signal.len() as i32, self.fs, self.harvest_option.as_ptr(), temporal_positions.as_mut_ptr(), f0.as_mut_ptr());
+                Harvest(
+                    self.signal.as_ptr(),
+                    self.signal.len() as i32,
+                    self.fs,
+                    self.harvest_option.as_ptr(),
+                    temporal_positions.as_mut_ptr(),
+                    f0.as_mut_ptr(),
+                );
             }
             HarvestResult { temporal_positions, f0 }
         })
@@ -149,7 +161,16 @@ impl SignalAnalyzer {
             let HarvestResult { f0, temporal_positions } = self.harvest_result();
             let mut spectrogram = SpectrogramLike::new(f0.len(), self.cheaptrick_option.fft_size() as usize / 2 + 1);
             unsafe {
-                CheapTrick(self.signal.as_ptr(), self.signal.len() as i32, self.fs, temporal_positions.as_ptr(), f0.as_ptr(), f0.len() as i32, self.cheaptrick_option.as_ptr(), spectrogram.as_mut_ptr());
+                CheapTrick(
+                    self.signal.as_ptr(),
+                    self.signal.len() as i32,
+                    self.fs,
+                    temporal_positions.as_ptr(),
+                    f0.as_ptr(),
+                    f0.len() as i32,
+                    self.cheaptrick_option.as_ptr(),
+                    spectrogram.as_mut_ptr(),
+                );
             }
             spectrogram
         })
@@ -182,7 +203,13 @@ impl SignalAnalyzer {
     }
 
     pub fn into_result(self) -> AnalyzeResult {
-        let SignalAnalyzer { signal, harvest_result, spectrogram, aperiodicity, .. } = self;
+        let SignalAnalyzer {
+            signal,
+            harvest_result,
+            spectrogram,
+            aperiodicity,
+            ..
+        } = self;
         AnalyzeResult {
             signal,
             f0: harvest_result.into_inner().map(|HarvestResult { f0, .. }| f0),

@@ -67,11 +67,7 @@ mod ndarray {
                 arr.as_standard_layout().into_owned()
             };
 
-            let lines = arr
-                .rows_mut()
-                .into_iter()
-                .map(|row| { row }.as_mut_ptr())
-                .collect();
+            let lines = arr.rows_mut().into_iter().map(|row| { row }.as_mut_ptr()).collect();
 
             let all = arr.into_raw_vec().into();
 
@@ -99,8 +95,12 @@ mod tests {
         let mut spec = SpectrogramLike::<u32>::new(10, 5);
         assert_eq!(spec.time_axis_size(), 10);
         assert_eq!(spec.frequency_axis_size(), 5);
-        spec.lines_mut().enumerate().for_each(|(i, line)| line.iter_mut().enumerate().for_each(|(j, item)| *item = (i * 5 + j) as u32));
-        spec.lines().enumerate().for_each(|(i, line)| line.iter().enumerate().for_each(|(j, item)| assert_eq!(*item, (i * 5 + j) as u32)));
+        spec.lines_mut()
+            .enumerate()
+            .for_each(|(i, line)| line.iter_mut().enumerate().for_each(|(j, item)| *item = (i * 5 + j) as u32));
+        spec.lines()
+            .enumerate()
+            .for_each(|(i, line)| line.iter().enumerate().for_each(|(j, item)| assert_eq!(*item, (i * 5 + j) as u32)));
         let ptr = spec.as_mut_ptr();
         for i in 0..10 {
             for j in 0..5 {
