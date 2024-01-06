@@ -33,6 +33,7 @@ jobs:
       with:
         reporter: 'github-pr-review'
         clippy_flags: --all-targets -- -Dwarnings
+        fail_on_error: true
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
   fmt:
