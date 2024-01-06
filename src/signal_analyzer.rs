@@ -1,6 +1,6 @@
 use crate::options::{CheapTrickOption, D4COption, HarvestOption};
 use crate::spectrogram_like::SpectrogramLike;
-use once_cell::sync::OnceCell;
+use std::sync::OnceLock;
 use world_sys::{CheapTrick, GetSamplesForHarvest, Harvest, D4C};
 
 struct HarvestResult {
@@ -14,9 +14,9 @@ pub struct SignalAnalyzer {
     harvest_option: HarvestOption,
     cheaptrick_option: CheapTrickOption,
     d4c_option: D4COption,
-    harvest_result: OnceCell<HarvestResult>,
-    spectrogram: OnceCell<SpectrogramLike<f64>>,
-    aperiodicity: OnceCell<SpectrogramLike<f64>>,
+    harvest_result: OnceLock<HarvestResult>,
+    spectrogram: OnceLock<SpectrogramLike<f64>>,
+    aperiodicity: OnceLock<SpectrogramLike<f64>>,
 }
 
 pub struct AnalyzeResult {
@@ -92,9 +92,9 @@ impl SignalAnalyzer {
             harvest_option,
             cheaptrick_option,
             d4c_option,
-            harvest_result: OnceCell::new(),
-            spectrogram: OnceCell::new(),
-            aperiodicity: OnceCell::new(),
+            harvest_result: OnceLock::new(),
+            spectrogram: OnceLock::new(),
+            aperiodicity: OnceLock::new(),
         }
     }
 
@@ -107,9 +107,9 @@ impl SignalAnalyzer {
             harvest_option: HarvestOption::new(),
             cheaptrick_option: CheapTrickOption::new(fs),
             d4c_option: D4COption::new(),
-            harvest_result: OnceCell::new(),
-            spectrogram: OnceCell::new(),
-            aperiodicity: OnceCell::new(),
+            harvest_result: OnceLock::new(),
+            spectrogram: OnceLock::new(),
+            aperiodicity: OnceLock::new(),
         }
     }
 
