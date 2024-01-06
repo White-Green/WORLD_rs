@@ -6,13 +6,29 @@ use std::env;
 use std::path::Path;
 
 const WORLD_BASE_DIR: &str = "WORLD";
-const WORLD_FILE_NAMES: &[&str] = &["cheaptrick", "codec", "common", "d4c", "dio", "fft", "harvest", "matlabfunctions", "stonemask", "synthesis", "synthesisrealtime"];
+const WORLD_FILE_NAMES: &[&str] = &[
+    "cheaptrick",
+    "codec",
+    "common",
+    "d4c",
+    "dio",
+    "fft",
+    "harvest",
+    "matlabfunctions",
+    "stonemask",
+    "synthesis",
+    "synthesisrealtime",
+];
 
 fn main() {
     let world_src_dir = Path::new(WORLD_BASE_DIR).join("src");
     generate_bindgen(&world_src_dir);
     for file_name in WORLD_FILE_NAMES {
-        cc::Build::new().cpp(true).file(&world_src_dir.join(file_name).with_extension("cpp")).include(&world_src_dir).compile(file_name);
+        cc::Build::new()
+            .cpp(true)
+            .file(&world_src_dir.join(file_name).with_extension("cpp"))
+            .include(&world_src_dir)
+            .compile(file_name);
     }
 }
 
@@ -21,7 +37,9 @@ fn generate_bindgen(world_src_dir: impl AsRef<Path>) {
     let world_header_dir = world_src_dir.join("world");
     WORLD_FILE_NAMES
         .iter()
-        .fold(bindgen::builder(), |builder, &entry| builder.header(world_header_dir.join(entry).with_extension("h").to_str().unwrap()))
+        .fold(bindgen::builder(), |builder, &entry| {
+            builder.header(world_header_dir.join(entry).with_extension("h").to_str().unwrap())
+        })
         .clang_arg(format!("-I{}", world_src_dir.display()))
         .clang_arg("-fparse-all-comments")
         .derive_copy(false)

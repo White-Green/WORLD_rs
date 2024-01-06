@@ -8,10 +8,7 @@ impl<T: Default + Copy> SpectrogramLike<T> {
         assert!(time_axis_size * frequency_axis_size > 0);
         let mut all = vec![T::default(); time_axis_size * frequency_axis_size].into_boxed_slice();
         let mut chunks_iter = all.chunks_exact_mut(frequency_axis_size);
-        let lines = chunks_iter
-            .by_ref()
-            .map(|slice| slice.as_mut_ptr())
-            .collect::<Box<[_]>>();
+        let lines = chunks_iter.by_ref().map(|slice| slice.as_mut_ptr()).collect::<Box<[_]>>();
         assert!(chunks_iter.into_remainder().is_empty());
         assert_eq!(lines.len(), time_axis_size);
         SpectrogramLike { all, lines }
@@ -70,11 +67,7 @@ mod ndarray {
                 arr.as_standard_layout().into_owned()
             };
 
-            let lines = arr
-                .rows_mut()
-                .into_iter()
-                .map(|row| { row }.as_mut_ptr())
-                .collect();
+            let lines = arr.rows_mut().into_iter().map(|row| { row }.as_mut_ptr()).collect();
 
             let all = arr.into_raw_vec().into();
 
@@ -102,16 +95,12 @@ mod tests {
         let mut spec = SpectrogramLike::<u32>::new(10, 5);
         assert_eq!(spec.time_axis_size(), 10);
         assert_eq!(spec.frequency_axis_size(), 5);
-        spec.lines_mut().enumerate().for_each(|(i, line)| {
-            line.iter_mut()
-                .enumerate()
-                .for_each(|(j, item)| *item = (i * 5 + j) as u32)
-        });
-        spec.lines().enumerate().for_each(|(i, line)| {
-            line.iter()
-                .enumerate()
-                .for_each(|(j, item)| assert_eq!(*item, (i * 5 + j) as u32))
-        });
+        spec.lines_mut()
+            .enumerate()
+            .for_each(|(i, line)| line.iter_mut().enumerate().for_each(|(j, item)| *item = (i * 5 + j) as u32));
+        spec.lines()
+            .enumerate()
+            .for_each(|(i, line)| line.iter().enumerate().for_each(|(j, item)| assert_eq!(*item, (i * 5 + j) as u32)));
         let ptr = spec.as_mut_ptr() as *mut *mut u32;
         for i in 0..10 {
             for j in 0..5 {
