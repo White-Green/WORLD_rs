@@ -53,8 +53,8 @@ impl<T> SpectrogramLike<T> {
     }
 }
 
-#[cfg(feature = "ndarray")]
-mod ndarray {
+#[cfg(any(feature = "ndarray", test))]
+mod conversion_ndarray {
     use ndarray::Array2;
 
     use super::SpectrogramLike;
@@ -89,6 +89,7 @@ mod ndarray {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ndarray::{s, Array2};
 
     #[test]
     fn test_spectrogram_like() {
@@ -107,5 +108,24 @@ mod tests {
                 assert_eq!(unsafe { *(*ptr.offset(i)).offset(j) }, (i * 5 + j) as u32);
             }
         }
+    }
+
+    #[test]
+    fn test_spectrogram_like_ndarray_conversion() {
+        let raw_array1 = [[1., 2., 3.], [4., 5., 6.]];
+        let array: Array2<f64> = ndarray::arr2(&raw_array1);
+        let spec = SpectrogramLike::from(array.clone());
+        assert_eq!(spec.lines().collect::<Vec<_>>(), raw_array1);
+        assert_eq!(Array2::from(spec), array);
+
+        let raw_array2 = [[1., 4.], [2., 5.], [3., 6.]];
+        let spec = SpectrogramLike::from(ndarray::arr2(&raw_array2).reversed_axes());
+        assert_eq!(spec.lines().collect::<Vec<_>>(), raw_array1);
+        assert_eq!(Array2::from(spec), array);
+
+        let raw_array3 = [[0., 0., 0., 0., 0.], [0., 1., 2., 3., 0.], [0., 4., 5., 6., 0.], [0., 0., 0., 0., 0.]];
+        let spec = SpectrogramLike::from(ndarray::arr2(&raw_array3).slice(s![1..3, 1..4]).into_owned());
+        assert_eq!(spec.lines().collect::<Vec<_>>(), raw_array1);
+        assert_eq!(Array2::from(spec), array);
     }
 }
